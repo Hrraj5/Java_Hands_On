@@ -1,0 +1,82 @@
+package org.hr.development;
+
+import javax.sound.sampled.Line;
+import java.util.LinkedList;
+import java.util.Queue;
+
+/**
+ * Hello world!
+ *
+ */
+public class App {
+    private static int MAX_SIZE = 10;
+    static class Producer {
+        private final Queue<Integer> producerQueue;
+        public Producer(Queue<Integer> producerQueue) {
+            this.producerQueue = producerQueue;
+        }
+
+        public void run() {
+            int data = 0;
+
+            while (true) {
+                synchronized (producerQueue) {
+                    {
+                        if (producerQueue.size() == MAX_SIZE) {
+                            try {
+                                producerQueue.wait();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            producerQueue.offer(data);
+                            System.out.println("Produced Value :: "+ data);
+                            data++;
+                            producerQueue.notifyAll();
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    static class Consumer {
+        private final Queue<Integer> consummerQueue;
+        public Consumer(Queue<Integer> consummerQueue) {
+            this.consummerQueue = consummerQueue;
+        }
+
+        public void run() {
+            while (true) {
+                synchronized (consummerQueue) {
+                    if (consummerQueue.isEmpty()) {
+                        try {
+                            consummerQueue.wait();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        int value = consummerQueue.poll();
+                        System.out.println("Consumed Value :: " + value);
+                        consummerQueue.notifyAll();
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Queue<Integer> queue = new LinkedList<>();
+        Producer producer = new Producer(queue);
+        Consumer consumer = new Consumer(queue);
+        producer.run();
+        consumer.run();
+    }
+
+}
+
+
+
+
+

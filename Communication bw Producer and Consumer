@@ -1,3 +1,5 @@
+// Here communication between consumer and producer is happening using a queue as communication channel.
+
 package org.hr.development;
 
 import javax.sound.sampled.Line;
